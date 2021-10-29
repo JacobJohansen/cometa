@@ -1,0 +1,12 @@
+<ng-container *ngLet="expanded$ | async as expanded">
+    <div (click)="toggleExpand()" (dblclick)="toggleExpandFromArrow($event)" [class.opened]="expanded" [style.paddingLeft.px]="level * 25" matRipple class="row" *ngLet="lastFolder$ | async as lastFolder" [class.selected]="lastFolder === folder.folder_id">
+        <mat-icon class="arrow" (click)="toggleExpandFromArrow($event)" [class.hidden]="folder.folders.length === 0">keyboard_arrow_right</mat-icon>
+        <div class="item">
+            <mat-icon>folder</mat-icon>
+            <div class="folderName">{{ folder.name }}</div>
+        </div>
+    </div>
+    <div *ngIf="expanded" class="container">
+        <cometa-tree-folder-item [parent]="parent.concat(folder)" [level]="level + 1" [folder]="folder" *ngFor="let folder of folder.folders"></cometa-tree-folder-item>
+    </div>
+</ng-container>

@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>
+  <ng-container *ngIf="data.mode === 'new'; else editTitle">
+    New folder
+  </ng-container>
+  <ng-template #editTitle>
+    Modify folder
+  </ng-template>
+</h2>
+<form [formGroup]="rForm" autocomplete="none" spellcheck="false" (ngSubmit)="submit(rForm.value)">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="enter-value">
+      <mat-label>Name</mat-label>
+      <input formControlName="name" disableAutocomplete spellcheck="false" type="text" matInput>
+    </mat-form-field>
+    <mat-form-field *ngIf="rForm.contains('department')" appearance="outline">
+      <mat-label>Department</mat-label>
+      <mat-select formControlName="department">
+        <mat-option [value]="department.department_id" *ngFor="let department of departments | sortBy:'department_name'">{{ department.department_name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-stroked-button color="warn" mat-dialog-close>Cancel</button>
+    <button mat-stroked-button color="primary" [disabled]="rForm.invalid">OK</button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,6 @@
+/scripts/logs/*.log {
+    rotate 4
+    weekly
+    compress
+    notifempty
+}

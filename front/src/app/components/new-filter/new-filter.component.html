@@ -1,0 +1,117 @@
+<div class="upper-container">
+  <div (click)="toggleSidenav()" class="showFolders" [class.toggle-search]="openedSearch$ | async">
+      <i></i>
+  </div>
+  <div class="return-search" [class.toggle-search]="!(openedSearch$ | async)" (click)="display_features()">
+    <mat-icon>keyboard_backspace</mat-icon>
+  </div>
+  <div class="breadcrumb-container" [class.toggle-search]="openedSearch$ | async">
+      <div class="breadcrumb" (click)="returnToRoot()">
+          <i></i>
+          <span>Home</span>
+      </div>
+      <div class="breadcrumb" *ngFor="let folder of currentRoute$ | async">
+          <p (click)="returnParent(folder)" class="return"></p>
+          <i></i>
+          <span (click)="returnFolder(folder)">{{ folder.name }}</span>
+      </div>
+  </div>
+  <div *ngIf="(filters$ | async).length == 0" class="new-search-input" [class.search-opened]="openedSearch$ | async">
+    <mat-form-field>
+      <input matInput class="search-input-box" type="text" [(ngModel)]="searchInput" (keydown.enter)="searchFeature()" disableAutocomplete placeholder="Test name" #addTest>
+    </mat-form-field>
+  </div>
+  <div class="filters" *ngIf="(filters$ | async).length != 0">
+    <div class="filter" *ngFor="let filter of filters$ | async; trackBy: getId">
+      <span [innerHTML]="filter | filterText:moreOrLessSteps.value | storeSelector | async"></span>
+      <div (click)="removeFilter(filter)" class="close"></div>
+    </div>
+    <div style="clear: both;"></div>
+  </div>
+  <div *ngIf="(filters$ | async).length == 0" class="filter-button" [class.toggle-search]="!(openedSearch$ | async)">
+      <i [matMenuTriggerFor]="addMenu" class="filter-icon"></i>
+      <mat-menu #addMenu="matMenu" class="new-search" [overlapTrigger]="false" direction="right">
+          <button (click)="addFilter(filter)" mat-menu-item *ngFor="let filter of filters$ | async | alreadyTakenFilter | slice:2">{{ filter.title }}</button>
+      </mat-menu>
+  </div>
+  <div *ngIf="(filters$ | async).length == 0" class="search-container"  (click)="open_search(); searchFeature()">
+    <mat-icon class="search-button">search</mat-icon>
+  </div>
+  <div class="dialogs">
+      <!-- Select department filter -->
+      <div *ngIf="dialogs.app | async" class="add-app dialog">
+          <h4>Add Application</h4>
+          <br />
+          <mat-select placeholder="Application" #addApp>
+            <mat-option *ngFor="let app of applications$ | async | sortBy:'app_name'" [value]="app.app_id">{{ app.app_name }}</mat-option>
+          </mat-select>
+          <br />
+          <br />
+          <div class="buttons">
+            <button (click)="dialogs.app.next(false)" color="warn" mat-stroked-button><b>CANCEL</b></button>
+            <button [disabled]="!addApp.value" (click)="addFilterOK('app', addApp.value)" mat-stroked-button color="primary"><b>OK</b></button>
+          </div>
+        </div>
+        <div *ngIf="dialogs.env | async" class="add-env dialog">
+          <h4>Add Environment</h4>
+          <br />
+          <mat-select placeholder="Environment" #addEnv>
+            <mat-option *ngFor="let env of environments$ | async | sortBy:'environment_name'" [value]="env.environment_id">{{ env.environment_name }}</mat-option>
+          </mat-select>
+          <br />
+          <br />
+          <div class="buttons">
+            <button (click)="dialogs.env.next(false)" color="warn" mat-stroked-button><b>CANCEL</b></button>
+            <button [disabled]="!addEnv.value" (click)="addFilterOK('env', addEnv.value)" mat-stroked-button color="primary"><b>OK</b></button>
+          </div>
+        </div>
+        <div *ngIf="dialogs.steps | async" class="add-steps dialog">
+          <h4>Add # Steps</h4>
+          <br />
+          <mat-radio-group [formControl]="moreOrLessSteps">
+            <mat-radio-button color="primary" value=">">
+              More than
+            </mat-radio-button><br /><br />
+            <mat-radio-button color="primary" value="is">
+              Exactly
+            </mat-radio-button><br /><br />
+            <mat-radio-button color="primary" value="<">
+              Less than
+            </mat-radio-button><br />
+          </mat-radio-group>
+          <mat-form-field>
+            <input matInput disableAutocomplete (keydown.enter)="addFilterOK('steps', steps.value, moreOrLessSteps.value)" type="number" min="0" #steps pattern="[0-9]{1,}" style="text-align: center;">
+          </mat-form-field>
+          <br />
+          <br />
+          <div class="buttons">
+            <button (click)="dialogs.steps.next(false)" color="warn" mat-stroked-button><b>CANCEL</b></button>
+            <button [disabled]="!steps.value" (click)="addFilterOK('steps', steps.value, moreOrLessSteps.value)" mat-stroked-button color="primary"><b>OK</b></button>
+          </div>
+        </div>
+        <div *ngIf="dialogs.ok | async" class="add-steps dialog">
+          <h4>Add # Ok</h4>
+          <br />
+          <mat-radio-group [formControl]="moreOrLessSteps">
+            <mat-radio-button color="primary" value=">">
+              More than
+            </mat-radio-button><br /><br />
+            <mat-radio-button color="primary" value="is">
+              Exactly
+            </mat-radio-button><br /><br />
+            <mat-radio-button color="primary" value="<">
+              Less than
+            </mat-radio-button><br />
+          </mat-radio-group>
+          <mat-form-field>
+            <input matInput disableAutocomplete type="number" (keydown.enter)="addFilterOK('ok', oks.value, moreOrLessSteps.value)" min="0" #oks pattern="[0-9]{1,}" style="text-align: center;">
+          </mat-form-field>
+          <br />
+          <br />
+          <div class="buttons">
+            <button (click)="dialogs.ok.next(false)" color="warn" mat-stroked-button><b>CANCEL</b></button>
+            <button [disabled]="!oks.value" (click)="addFilterOK('ok', oks.value, moreOrLessSteps.value)" mat-stroked-button color="primary"><b>OK</b></button>
+          </div>
+        </div>
+  </div>
+</div>

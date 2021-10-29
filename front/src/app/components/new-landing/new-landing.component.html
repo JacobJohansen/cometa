@@ -1,0 +1,135 @@
+<div class="backdrop" [class.opened]="showFolders$ | async" (click)="hideSidenav()"></div>
+<div class="container">
+  <div class="searcher" [class.opened]="showFolders$ | async">
+    <div class="add-from-sidenav">
+      <button class="addIcon" mat-raised-button aria-label="Add button" (click)="openedAdd = !openedAdd">
+        <mat-icon>add</mat-icon>
+        Add
+      </button>
+      <button class="addFolderIcon" mat-raised-button aria-label="Create folder button" (click)="createFolder()" [class.hideAdd]="!openedAdd">
+        <mat-icon>add</mat-icon>
+        Create folder
+      </button>
+      <button *ngIf="canCreateFeature && hasSubscription" class="addFeatureIcon" mat-raised-button aria-label="Create feature button" (click)="openCreateFeature()" [class.hideAdd]="!openedAdd">
+          <mat-icon>add</mat-icon>
+          Create feature
+      </button>
+    </div>
+    <div class="folder-tree">
+      <cometa-folder-tree></cometa-folder-tree>
+    </div>
+  </div>
+  <div class="viewer">
+    <cometa-new-filter class="filter-bar"></cometa-new-filter>
+    <!-- Pipe features$ observable -->
+    <div *ngLet="(features$ | async) as features" [@listAnimation]="features.length" class="feature-list" [class.hide-features]="openedSearch$ | async">
+      <!-- Check if there are feature available -->
+      <ng-container *ngIf="features.length > 0; else noFeaturesFound">
+        <!-- Show features without depends_on_others -->
+        <div *ngLet="features | depends:false | async as feats">
+          <!-- Section header -->
+          <ng-container *ngIf="feats.length > 0 && paginationWithoutDepends$ | async as page">
+            <div class="features-header">
+              <div class="count">Found <span class="blue">{{ feats.length }}</span> features</div>
+              <div class="view-selector">
+                <div matRipple (click)="setView('without', 'tiles')" matTooltip="Tiles view" [class.selected]="itemsViewWithout === 'tiles'" class="tiles view"></div>
+                <div matRipple (click)="setView('without', 'list')" matTooltip="List view" [class.selected]="itemsViewWithout === 'list'" class="list view"></div>
+              </div>
+            </div>
+            <!-- Feature list -->
+            <ng-container *ngIf="itemsViewWithout === 'tiles'; else listView">
+              <cometa-feature-item [feature_id]="feature" class="feature-item" *ngFor="let feature of feats | featureSort:(sorting$ | async) | async | pagination:page.pageIndex:page.pageSize"></cometa-feature-item>
+            </ng-container>
+            <ng-template #listView>
+              <cometa-new-feature-list [dependsOnOther]="false"  [features]="feats | featureSort:(sorting$ | async):(reverse$ | async) | async | pagination:page.pageIndex:page.pageSize"></cometa-new-feature-list>
+            </ng-template>
+            <!-- Section ending -->
+            <div style="clear: both"></div>
+            <!-- Pagination -->
+            <mat-paginator class="paginator-center" *ngIf="feats.length > 25"
+              [length]="feats.length"
+              [pageIndex]="page.pageIndex"
+              [pageSize]="page.pageSize"
+              [showFirstLastButtons]="true"
+              [pageSizeOptions]="[25, 100, 250, 500]"
+              (page)="handlePageChange(page.id, $event)">
+            </mat-paginator>
+          </ng-container>
+        </div>
+        <!-- Show features with depends_on_others -->
+        <div *ngLet="features | depends:true | async as feats">
+          <!-- Section header -->
+          <ng-container *ngIf="feats.length > 0 && paginationWithDepends$ | async as page">
+            <div class="features-header">
+              <div class="count">Found <span class="blue">{{ feats.length }}</span> related features</div>
+              <div class="view-selector">
+                <div matRipple (click)="setView('with', 'tiles')" matTooltip="Tiles view" [class.selected]="itemsViewWith === 'tiles'" class="tiles view"></div>
+                <div matRipple (click)="setView('with', 'list')" matTooltip="List view" [class.selected]="itemsViewWith === 'list'" class="list view"></div>
+              </div>
+            </div>
+            <!-- Feature list -->
+            <ng-container *ngIf="itemsViewWith === 'tiles'; else listView">
+              <cometa-feature-item [feature_id]="feature" class="feature-item" *ngFor="let feature of feats | featureSort:(sorting$ | async) | async | pagination:page.pageIndex:page.pageSize"></cometa-feature-item>
+            </ng-container>
+            <ng-template #listView>
+              <cometa-feature-list [dependsOnOther]="true" [features]="feats | featureSort:(sorting$ | async):(reverse$ | async) | async | pagination:page.pageIndex:page.pageSize"></cometa-feature-list>
+            </ng-template>
+            <!-- Section ending -->
+            <div style="clear: both"></div>
+            <!-- Pagination -->
+            <mat-paginator class="paginator-center" *ngIf="feats.length > 25"
+              [length]="feats.length"
+              [pageIndex]="page.pageIndex"
+              [pageSize]="page.pageSize"
+              [showFirstLastButtons]="true"
+              [pageSizeOptions]="[25, 100, 250, 500]"
+              (page)="handlePageChange(page.id, $event)">
+            </mat-paginator>
+          </ng-container>
+        </div>
+      </ng-container>
+      <div *ngIf="(folders$ | async) as folders" class="folders-list">
+        <div class="features-header">
+          <div *ngIf="folders.length > 0" class="folders_count">Found <span class="blue">{{ folders.length }}</span> folders</div>
+          <div class="view-selector">
+            <div matRipple (click)="setView('folder', 'tiles')" matTooltip="Tiles view" [class.selected]="itemsViewFolder === 'tiles'" class="tiles view"></div>
+            <div matRipple (click)="setView('folder', 'list')" matTooltip="List view" [class.selected]="itemsViewFolder === 'list'" class="list view"></div>
+          </div>
+        </div>
+        <div class="folder-container">
+          <ng-container *ngIf="itemsViewFolder === 'tiles'; else listView">
+            <cometa-folder (click)="goFolder(folder)" [folder]="folder" *ngFor="let folder of folders"></cometa-folder>
+          </ng-container>
+          <ng-template #listView>
+            <cometa-folder-list [folders]="folders"></cometa-folder-list>
+          </ng-template>
+        </div>
+      </div>
+      <!-- Template for when no features are found -->
+      <ng-template #noFeaturesFound>
+        <p>This folder is empty. <span *ngIf="canCreateFeature && hasSubscription">Would you like to <span class="new-feature-text" (click)="_sharedActions.openEditFeature()">create a new feature</span>?</span></p>
+      </ng-template>
+      <div *ngIf="canCreateFeature && hasSubscription" class="add-feature-container">
+        <div class="add-feature-tooltip" [class.hide-add]="!openedAdd">Add feature</div>
+        <div class="add-feature" [class.hide-add]="!openedAdd">
+          <button class="addIcon" mat-fab aria-label="Create feature button" (click)="_sharedActions.openEditFeature()">
+            <div class="icon">
+              <i class="feature-icon"></i>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="add-folder-tooltip" [class.hide-add]="!openedAdd">Add folder</div>
+      <div class="add-folder" [class.hide-add]="!openedAdd">
+        <button class="addIcon" mat-fab aria-label="Create folder button" (click)="createFolder()">
+          <mat-icon>folder_open</mat-icon>
+        </button>
+      </div>
+      <div class="add-button">
+          <button class="addIcon" mat-fab aria-label="Open folder / feature creation" (click)="openedAdd = !openedAdd">
+              <mat-icon>add</mat-icon>
+          </button>
+      </div>
+    </div>
+  </div>
+</div>

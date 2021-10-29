@@ -1,0 +1,30 @@
+:host::ng-deep > cometa-tree-folder-item > div{
+    line-height: 40px !important;
+    padding-left: 5px !important;
+    box-sizing: border-box;
+}
+
+div {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    line-height: 40px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #5F6368;
+    padding: 0px 10px;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding-left: 29px;
+    mat-icon {
+        flex: 0 24px;
+        margin-right: 8px;
+    }
+    &:hover {
+        background: rgba(black, .03);
+    }
+}
+
+.hidden {
+    visibility: hidden;
+}

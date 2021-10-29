@@ -1,0 +1,42 @@
+{
+  "chrome": {
+    "default": "88.0",
+    "versions": {
+      "88.0": {
+        "image": "selenoid/vnc_chrome:88.0",
+        "port": "4444",
+        "path": "/",
+        "volumes": [
+          "<downloadsPath>:/home/selenium/Downloads",
+          "<bgPath>:/usr/share/images/fluxbox/aerokube.png"
+        ]
+      }
+    }
+  },
+  "MicrosoftEdge": {
+    "default": "90.0",
+    "versions": {
+      "90.0": {
+        "image": "browsers/edge:90.0",
+        "port": "4444",
+        "path": "/",
+        "volumes": [
+          "<bgPath>:/usr/share/images/fluxbox/aerokube.png"
+        ]
+      }
+    }
+  },
+  "opera": {
+    "default": "74.0",
+    "versions": {
+      "74.0": {
+        "image": "selenoid/vnc_opera:74.0",
+        "port": "4444",
+        "path": "/",
+        "volumes": [
+          "<bgPath>:/usr/share/images/fluxbox/aerokube.png"
+        ]
+      }
+    }
+  }
+}
