@@ -100,7 +100,7 @@ Test server access `curl -k  https://<yourdomain>:<specified port - default 443>
 Example `curl -k  https://localhost:8443/`
 
 You should see something like this:
-<p>The document has moved <a href="/welcome.html?target_link_uri=....">here</a>.</p>
+<p>The document has moved <i>here</i>.</p>
 
 
 8. Run your first test
